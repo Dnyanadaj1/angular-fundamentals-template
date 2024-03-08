@@ -67,15 +67,15 @@ export class AppComponent implements OnInit, OnDestroy {
     // Your code should looks like this: this.planetAndCharactersResults$ = /* Your code */
     // YOUR CODE STARTS HERE
     // YOUR CODE ENDS HERE
-    // const planetService = this.mockDataService.getPlanets();
-    // const characterService = this.mockDataService.getCharacters();
-    // this.planetAndCharactersResults$ =
-    //   forkJoin(planetService, characterService)
-    //     .pipe(
-    //       map(([plantes, characters]) => {return [...plantes, ...characters]})
-    //     );
+    const planetService = this.mockDataService.getPlanets();
+    const characterService = this.mockDataService.getCharacters();
+    this.planetAndCharactersResults$ =
+      forkJoin(planetService, characterService)
+        .pipe(
+          map(([plantes, characters]) => {return [...plantes, ...characters]})
+        );
 
-    concat(this.mockDataService.getPlanets(), this.mockDataService.getCharacters());
+    //concat(this.mockDataService.getPlanets(), this.mockDataService.getCharacters());
 
   }
 
@@ -87,12 +87,21 @@ export class AppComponent implements OnInit, OnDestroy {
     - Check the received value using the areAllValuesTrue function and pass them to the isLoading variable. */
     // YOUR CODE STARTS HERE
     // YOUR CODE ENDS HERE
+    const charactersLoader$ = this.mockDataService.getCharactersLoader();
+    const planetsLoader$ = this.mockDataService.getPlanetLoader();
+ 
+    const combinedData =  combineLatest([charactersLoader$, planetsLoader$]).subscribe(([charactersLoader, planetsLoader]) => {
+        this.isLoading = this.areAllValuesTrue([charactersLoader, planetsLoader]);
+      });
+ 
+      this.subscriptions.push(combinedData);
   }
 
   ngOnDestroy(): void {
     // 5.2 Unsubscribe from all subscriptions
     // YOUR CODE STARTS HERE
     // YOUR CODE ENDS HERE
+    this.searchTermByCharacters.unsubscribe();
   }
 
   areAllValuesTrue(elements: boolean[]): boolean {
