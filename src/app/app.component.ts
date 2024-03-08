@@ -1,6 +1,8 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import {
   combineLatest,
+  concat,
+  debounceTime,
   filter,
   forkJoin,
   map,
@@ -36,6 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
     // YOUR CODE STARTS HERE
 
     // YOUR CODE ENDS HERE
+    this.searchTermByCharacters.next(inputValue);
   }
 
   initCharacterEvents(): void {
@@ -45,12 +48,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // 3. Add debounce to prevent API calls until user stop typing.
 
+
+
     this.charactersResults$ = this.searchTermByCharacters
         .pipe
         // YOUR CODE STARTS HERE
 
         // YOUR CODE ENDS HERE
-        ();
+        ( 
+          filter(value=>value.length>3), 
+          debounceTime(1000),
+          switchMap(x=>this.mockDataService.getCharacters(x))
+        );
   }
 
   loadCharactersAndPlanet(): void {
@@ -58,6 +67,16 @@ export class AppComponent implements OnInit, OnDestroy {
     // Your code should looks like this: this.planetAndCharactersResults$ = /* Your code */
     // YOUR CODE STARTS HERE
     // YOUR CODE ENDS HERE
+    // const planetService = this.mockDataService.getPlanets();
+    // const characterService = this.mockDataService.getCharacters();
+    // this.planetAndCharactersResults$ =
+    //   forkJoin(planetService, characterService)
+    //     .pipe(
+    //       map(([plantes, characters]) => {return [...plantes, ...characters]})
+    //     );
+
+    concat(this.mockDataService.getPlanets(), this.mockDataService.getCharacters());
+
   }
 
   initLoadingState(): void {
